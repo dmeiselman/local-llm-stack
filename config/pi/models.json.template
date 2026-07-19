@@ -26,6 +26,14 @@
           "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 }
         },
         {
+          "id": "local-coder-think",
+          "name": "Qwen3.6 27B coder + thinking (local, via litellm)",
+          "reasoning": true,
+          "contextWindow": 114688,
+          "maxTokens": 16384,
+          "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 }
+        },
+        {
           "id": "local-gemma",
           "name": "Gemma4 26B QAT thinking (local, via litellm)",
           "reasoning": true,

@@ -19,10 +19,17 @@ model_list:
       api_base: http://127.0.0.1:8080/v1
       api_key: "none"        # llama-server has no auth, but the openai provider needs a value
 
-  # Dedicated coder (thinking disabled)
+  # Dedicated coder (thinking disabled) -- fast
   - model_name: local-coder
     litellm_params:
       model: openai/qwen3.6-27b
+      api_base: http://127.0.0.1:8080/v1
+      api_key: "none"
+
+  # Same coder, thinking enabled -- slower, better on hard problems
+  - model_name: local-coder-think
+    litellm_params:
+      model: openai/qwen3.6-27b-think
       api_base: http://127.0.0.1:8080/v1
       api_key: "none"
 

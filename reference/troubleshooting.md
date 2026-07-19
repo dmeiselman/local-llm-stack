@@ -63,6 +63,12 @@ mode treats as an error).
 **A client hangs on long prompts.** The client's advertised context exceeds the server `-c`. Keep
 client context ≤ server `-c`. See [vram-tuning.md](vram-tuning.md).
 
+**A thinking model returns an empty/cut-off answer (`finish_reason=length`).** Its reasoning ate the
+whole output budget before it reached the answer. Raise the client's `max_tokens` / `output` /
+`maxTokens` (the reference `local-coder-think` uses 16384). Reasoning is emitted on a separate
+`reasoning_content` channel, so it won't leak into `content` or tool-call arguments — it just costs
+tokens and time.
+
 ## Voice (if enabled)
 
 **Crackling / robotic speech.** Open WebUI fell back to browser TTS. Set the TTS engine to

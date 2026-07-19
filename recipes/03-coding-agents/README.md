@@ -3,8 +3,24 @@
 **Goal:** drive the local models from terminal coding agents.
 **Prereqs:** Recipe 02 (LiteLLM on `:4000`, `LITELLM_MASTER_KEY` exported).
 
-All three agents point at the **same gateway**. `local-coder` (thinking off) is usually the best
-agent model; `local-fast` is a fine general default.
+All three agents point at the **same gateway**. `local-coder` (thinking off) is a fast agent
+model; `local-fast` is a fine general default.
+
+### Fast vs thinking coder
+
+The gateway exposes the 27B coder two ways (same GGUF, different flags):
+
+| Model | Thinking | Use it for |
+|-------|----------|------------|
+| `local-coder` | off | quick edits, tight agent loops, low latency |
+| `local-coder-think` | on | hard problems where you'll trade time for quality |
+
+Measured trade-off on 2×3060: the thinking variant produces noticeably more thorough answers but
+runs ~3–4× slower and emits ~6× the tokens per reply. **Give it a generous output budget** — its
+reasoning consumes the `max_tokens`/output limit first, and a stingy limit can hit
+`finish_reason=length` before the actual answer appears (that's why its client `output`/`maxTokens`
+is set higher). Switching between the two triggers a llama-swap reload (~15–25 s), since they're
+separate model entries.
 
 ---
 

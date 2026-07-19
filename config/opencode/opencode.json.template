@@ -22,6 +22,11 @@
           "tool_call": true,
           "limit": { "context": 114688, "output": 8192 }
         },
+        "local-coder-think": {
+          "name": "Qwen3.6 27B coder + thinking (local, via litellm)",
+          "tool_call": true,
+          "limit": { "context": 114688, "output": 16384 }
+        },
         "local-gemma": {
           "name": "Gemma4 26B QAT thinking (local, via litellm)",
           "tool_call": true,

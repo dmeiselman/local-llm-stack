@@ -53,6 +53,23 @@ models:
       --host 127.0.0.1 --port ${PORT}
       --temp 0.6 --top-k 20 --top-p 0.95 --min-p 0.0
 
+  # ---- Same coder GGUF, thinking ENABLED (slower, better on hard problems) ----
+  # Omit enable_thinking -> the Qwen3.6 template default (thinking on). The
+  # temp 0.6 / top-p 0.95 / top-k 20 sampling here IS Qwen3's thinking-mode
+  # preset, so this block is more internally consistent than the no-think one.
+  # Trade-off (measured): ~3-4x the latency and ~6x the tokens per reply, and
+  # reasoning EATS the output budget -- give clients a generous max output or a
+  # reply can hit finish_reason=length before the answer appears.
+  qwen3.6-27b-think:
+    cmd: |
+      ${llama-server}
+      -m __MODELS_DIR__/Qwen_Qwen3.6-27B-UD-Q4_K_XL.gguf
+      -ngl 99 -fa on -ctk q8_0 -ctv q8_0
+      -c 114688 -np 1 -ts 33,31
+      --jinja
+      --host 127.0.0.1 --port ${PORT}
+      --temp 0.6 --top-k 20 --top-p 0.95 --min-p 0.0
+
   # ---- Long-context / thinking: Gemma-4-26B-A4B QAT (MoE) --------------------
   # QAT (quantization-aware trained) Q4_0 holds quality well; runs the model's
   # native maximum context here.

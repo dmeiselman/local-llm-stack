@@ -13,8 +13,13 @@ For each model, three context numbers must agree, or clients stall:
 | `config/opencode/opencode.json` | `limit.context` | 196608 / 114688 / 262144 |
 | `config/pi/models.json` | `contextWindow` | 196608 / 114688 / 262144 |
 
+`local-coder-think` (the thinking variant) shares the coder's **114688** context — it's the same
+GGUF loaded with thinking on.
+
 **Rule:** a client's advertised context must be **≤** the server's `-c`. If a client claims more
 than llama-server allows, requests can hang. When you change `-c`, change the client values too.
+Separately, give **thinking** models a generous *output* budget (not context) — reasoning tokens
+are spent before the answer.
 
 ## Finding the max `-c` your GPUs allow
 
