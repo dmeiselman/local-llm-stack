@@ -1,0 +1,67 @@
+# llama-swap config
+# -----------------------------------------------------------------------------
+# llama-swap keeps ONE model warm at a time and hot-swaps on demand: a client
+# just asks for a model by name (or alias) at http://<host>:8080 and llama-swap
+# unloads the current model and loads the requested one (~15-25 s on this class
+# of hardware).
+#
+# The floating alias "llama-model" pins your current daily driver. To change
+# your default model, move that alias to a different model block below -- every
+# client keeps working because they all ask for the stable name.
+#
+# PLACEHOLDERS (fill these in, or render with scripts/render-configs.sh):
+#   __LLAMACPP_BIN__  absolute path to the llama-server binary you built,
+#                     e.g. /home/youruser/llama.cpp/build/bin/llama-server
+#   __MODELS_DIR__    directory holding your .gguf files, e.g. /home/youruser/models
+#
+# The -c (context), -ts (tensor split) and quant choices below are tuned for
+# 2x 12 GB GPUs (~24 GB total). RE-TUNE for your hardware -- see
+# reference/vram-tuning.md for the method.
+# -----------------------------------------------------------------------------
+
+healthCheckTimeout: 300   # seconds to wait for a model to become healthy on load
+startPort: 9101           # each spawned llama-server gets a port from here upward
+
+macros:
+  llama-server: __LLAMACPP_BIN__
+
+models:
+  # ---- Daily driver: Qwen3.6-35B-A3B (MoE, thinking) --------------------------
+  # MoE = only ~3B params active per token, so it is fast for its size.
+  qwen3.6-35b-a3b:
+    aliases:
+      - llama-model      # <-- floating daily-driver alias; move it to re-point "default"
+    cmd: |
+      ${llama-server}
+      -m __MODELS_DIR__/Qwen_Qwen3.6-35B-A3B-Q3_K_XL.gguf
+      -ngl 99 -fa on -ctk q8_0 -ctv q8_0
+      -c 196608 -np 1
+      --host 127.0.0.1 --port ${PORT}
+      --temp 1.0 --top-k 20 --top-p 0.95 --min-p 0.0
+
+  # ---- Coder: Qwen3.6-27B dense, thinking DISABLED ---------------------------
+  # -ts 33,31 nudges the layer split to balance VRAM across two uneven cards.
+  # NOTE: the JSON in --chat-template-kwargs MUST be single-quoted -- llama-swap
+  # parses cmd with shell-word rules and will crash on unquoted braces.
+  qwen3.6-27b:
+    cmd: |
+      ${llama-server}
+      -m __MODELS_DIR__/Qwen_Qwen3.6-27B-UD-Q4_K_XL.gguf
+      -ngl 99 -fa on -ctk q8_0 -ctv q8_0
+      -c 114688 -np 1 -ts 33,31
+      --jinja --chat-template-kwargs '{"enable_thinking":false}'
+      --host 127.0.0.1 --port ${PORT}
+      --temp 0.6 --top-k 20 --top-p 0.95 --min-p 0.0
+
+  # ---- Long-context / thinking: Gemma-4-26B-A4B QAT (MoE) --------------------
+  # QAT (quantization-aware trained) Q4_0 holds quality well; runs the model's
+  # native maximum context here.
+  gemma4-26b-qat:
+    cmd: |
+      ${llama-server}
+      -m __MODELS_DIR__/gemma4-26b-qat-text-Q4_0.gguf
+      -ngl 99 -fa on -ctk q8_0 -ctv q8_0
+      -c 262144 -np 1
+      --jinja
+      --host 127.0.0.1 --port ${PORT}
+      --temp 1.0 --top-k 64 --top-p 0.95 --min-p 0.0

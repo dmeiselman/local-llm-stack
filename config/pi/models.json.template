@@ -1,0 +1,39 @@
+{
+  "//": "pi coding agent -> LiteLLM gateway. Copy to ~/.pi/agent/models.json.",
+  "//apiKey": "pi does not expand env vars here; paste your real LITELLM_MASTER_KEY (file is user-only, not committed).",
+  "//cost": "All four cost keys are REQUIRED or pi rejects the file ('No models available').",
+  "//context": "contextWindow must match the preset used, or compaction misfires.",
+  "providers": {
+    "litellm": {
+      "baseUrl": "http://127.0.0.1:4000/v1",
+      "api": "openai-completions",
+      "apiKey": "__LITELLM_MASTER_KEY__",
+      "models": [
+        {
+          "id": "local-fast",
+          "name": "Qwen3.6 MoE (local, via litellm)",
+          "reasoning": true,
+          "contextWindow": 196608,
+          "maxTokens": 16384,
+          "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 }
+        },
+        {
+          "id": "local-coder",
+          "name": "Qwen3.6 27B coder no-think (local, via litellm)",
+          "reasoning": false,
+          "contextWindow": 114688,
+          "maxTokens": 16384,
+          "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 }
+        },
+        {
+          "id": "local-gemma",
+          "name": "Gemma4 26B QAT thinking (local, via litellm)",
+          "reasoning": true,
+          "contextWindow": 262144,
+          "maxTokens": 16384,
+          "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 }
+        }
+      ]
+    }
+  }
+}

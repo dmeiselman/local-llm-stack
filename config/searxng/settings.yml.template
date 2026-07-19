@@ -1,0 +1,18 @@
+# SearXNG settings for the local stack.
+# JSON output is enabled so Open WebUI and agent tools can query it
+# programmatically (stock SearXNG only returns HTML).
+#
+# PLACEHOLDER: __SEARXNG_SECRET__  a random 64-hex string (scripts/gen-secrets.sh).
+use_default_settings: true
+
+server:
+  secret_key: "__SEARXNG_SECRET__"
+  limiter: false          # no rate-limiting -- fine for a trusted LAN / local-only use
+  image_proxy: true
+
+search:
+  safe_search: 0
+  autocomplete: ""
+  formats:
+    - html
+    - json                # REQUIRED for programmatic queries (Open WebUI / agents)

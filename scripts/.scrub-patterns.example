@@ -1,0 +1,10 @@
+# Copy to scripts/.scrub-patterns (gitignored) and add site-specific regexes,
+# one extended-regex per line. The scrub gate loads these IN ADDITION to the
+# built-in generic secret/IP/username checks. Put anything identifying that is
+# NOT auto-derivable here -- your internal domain, an old leaked secret prefix,
+# a project codename, etc. Lines starting with # are ignored.
+#
+# Examples (edit for your environment; do NOT leave these literally):
+#   your-internal-domain\.lan
+#   my-old-hostname
+#   deadbeef            # first bytes of a rotated secret you want to be sure is gone

@@ -1,0 +1,30 @@
+# Secrets and rendered (filled-in) config files -- never commit these.
+config/litellm/.env
+.env
+
+# Rendered outputs: the templates are tracked; their filled siblings are not.
+config/**/config.yaml
+config/**/settings.yml
+config/**/opencode.json
+config/**/models.json
+config/**/settings.json
+config/**/mini.yaml
+config/**/*.env
+systemd/*.service
+compose/docker-compose.yml
+
+# Keep the templates/examples themselves.
+!config/**/*.template
+!config/**/*.example
+!systemd/*.template
+!compose/*.template
+
+# Models are huge -- never commit.
+*.gguf
+
+# Site-specific scrub patterns (may contain your real domain/host) -- keep local.
+scripts/.scrub-patterns
+
+# Editor / OS noise
+*.swp
+.DS_Store

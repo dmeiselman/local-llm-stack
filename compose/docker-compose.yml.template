@@ -1,0 +1,38 @@
+# llm-stack: SearXNG (web search) + LiteLLM (routing gateway)
+# -----------------------------------------------------------------------------
+# Runs without sudo if your user is in the `docker` group.
+#
+# SearXNG publishes on localhost only (127.0.0.1:8888). LiteLLM uses HOST
+# networking so that 127.0.0.1:8080 in its config resolves to llama-swap on the
+# host, and binds 0.0.0.0:4000 so other workstations on your LAN can reach the
+# gateway. If your network is NOT trusted, change 4000 to 127.0.0.1:4000 or
+# firewall it -- see reference/security.md.
+#
+# Expects sibling folders (relative to this file after you copy it into place):
+#   ./searxng/settings.yml   (from config/searxng/settings.yml.template)
+#   ./litellm/config.yaml    (from config/litellm/config.yaml.template)
+#   ./litellm/.env           (from config/litellm/.env.example)
+# -----------------------------------------------------------------------------
+services:
+  searxng:
+    image: searxng/searxng:latest
+    container_name: searxng
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8888:8080"
+    volumes:
+      - ./searxng:/etc/searxng:rw
+    environment:
+      - SEARXNG_BASE_URL=http://localhost:8888/
+
+  litellm:
+    image: ghcr.io/berriai/litellm:main-latest
+    container_name: litellm
+    restart: unless-stopped
+    # Host networking so LiteLLM can reach llama-swap at 127.0.0.1:8080 on the host.
+    network_mode: host
+    volumes:
+      - ./litellm/config.yaml:/app/config.yaml:ro
+    env_file:
+      - ./litellm/.env
+    command: ["--config", "/app/config.yaml", "--port", "4000", "--host", "0.0.0.0"]

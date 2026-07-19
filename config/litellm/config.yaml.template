@@ -1,0 +1,40 @@
+# LiteLLM routing gateway
+# -----------------------------------------------------------------------------
+# One OpenAI-compatible endpoint (http://<host>:4000) that fronts llama-swap on
+# :8080. The point of this layer is STABLE, ROLE-BASED NAMES: clients ask for
+# "local-fast" / "local-coder" / "local-gemma" and never need to know which
+# GGUF is loaded. Swap models in ONE place (here, or by moving the llama-swap
+# alias) and every client -- Open WebUI, opencode, pi, mini-swe-agent -- keeps
+# working unchanged.
+#
+# The `model:` value after `openai/` is the NAME llama-swap matches to pick /
+# hot-swap the backend model. All three route to the same api_base; routing is
+# by model name, not by URL.
+# -----------------------------------------------------------------------------
+model_list:
+  # Default general model -> llama-swap alias "llama-model" (your daily driver)
+  - model_name: local-fast
+    litellm_params:
+      model: openai/llama-model
+      api_base: http://127.0.0.1:8080/v1
+      api_key: "none"        # llama-server has no auth, but the openai provider needs a value
+
+  # Dedicated coder (thinking disabled)
+  - model_name: local-coder
+    litellm_params:
+      model: openai/qwen3.6-27b
+      api_base: http://127.0.0.1:8080/v1
+      api_key: "none"
+
+  # Long-context / thinking model
+  - model_name: local-gemma
+    litellm_params:
+      model: openai/gemma4-26b-qat
+      api_base: http://127.0.0.1:8080/v1
+      api_key: "none"
+
+litellm_settings:
+  drop_params: true          # silently drop OpenAI params the backend rejects, instead of erroring
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY   # comes from litellm/.env (see .env.example)

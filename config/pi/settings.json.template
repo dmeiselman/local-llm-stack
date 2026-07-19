@@ -1,0 +1,5 @@
+{
+  "//": "pi defaults. Copy to ~/.pi/agent/settings.json.",
+  "defaultProvider": "litellm",
+  "defaultModel": "local-fast"
+}

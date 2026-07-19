@@ -1,0 +1,28 @@
+[Unit]
+# ALTERNATIVE to llama-swap -- pick ONE. This runs a single, always-warm model
+# directly on :8080 with no hot-swapping. Simpler and skips the ~15-25 s swap
+# latency, but you get exactly one model. If you enable this, do NOT also enable
+# llama-swap.service (they both bind :8080).
+Description=llama.cpp server -- single dedicated model
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=__USER__
+Environment=CUDA_VISIBLE_DEVICES=0,1
+ExecStart=__LLAMACPP_BIN__ \
+    -m __MODELS_DIR__/Qwen_Qwen3.6-35B-A3B-Q3_K_XL.gguf \
+    -ngl 99 \
+    -fa on \
+    -ctk q8_0 -ctv q8_0 \
+    -c 196608 \
+    -np 1 \
+    --host 0.0.0.0 --port 8080 \
+    --alias local-fast \
+    --temp 1.0 --top-k 20 --top-p 0.95 --min-p 0.0
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

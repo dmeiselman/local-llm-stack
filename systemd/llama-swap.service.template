@@ -1,0 +1,16 @@
+[Unit]
+Description=llama-swap model proxy (hot-swaps GGUF models on :8080)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=__USER__
+# Binds 0.0.0.0:8080 so LAN clients and the LiteLLM container can reach it.
+# -watch-config makes edits to config.yaml take effect without a restart.
+ExecStart=__LLAMASWAP_DIR__/llama-swap -config __LLAMASWAP_DIR__/config.yaml -listen 0.0.0.0:8080 -watch-config
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

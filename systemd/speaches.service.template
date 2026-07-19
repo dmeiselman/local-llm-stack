@@ -1,0 +1,19 @@
+[Unit]
+# OPTIONAL / voice module (STT). See recipes/04-voice-optional/.
+# NOTE: this is intentionally NOT enabled in the reference deployment -- STT+TTS
+# are kept OFF so their ~4 GB of VRAM stays available for KV cache / longer
+# context. Enable only if you want voice more than you want long context.
+Description=Speaches STT (faster-whisper, GPU)
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+ExecStartPre=-/usr/bin/docker rm -f speaches
+ExecStart=/usr/bin/docker run --rm --gpus all -p 127.0.0.1:8001:8000 -v hf-hub-cache:/home/ubuntu/.cache/huggingface/hub --name speaches ghcr.io/speaches-ai/speaches:latest-cuda
+ExecStop=/usr/bin/docker stop speaches
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

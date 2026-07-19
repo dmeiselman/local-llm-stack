@@ -1,0 +1,18 @@
+[Unit]
+# OPTIONAL / voice module (TTS). See recipes/04-voice-optional/.
+# NOTE: intentionally NOT enabled in the reference deployment -- STT+TTS are kept
+# OFF so their VRAM stays available for KV cache / longer context.
+Description=Kokoro TTS (kokoro-fastapi, GPU)
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+ExecStartPre=-/usr/bin/docker rm -f kokoro
+ExecStart=/usr/bin/docker run --rm --gpus all -p 127.0.0.1:8880:8880 --name kokoro ghcr.io/remsky/kokoro-fastapi-gpu:latest
+ExecStop=/usr/bin/docker stop kokoro
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

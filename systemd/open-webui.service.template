@@ -1,0 +1,35 @@
+[Unit]
+Description=Open WebUI (chat front-end)
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+ExecStartPre=-/usr/bin/docker rm -f open-webui
+# Routed through LiteLLM (:4000) only; Ollama API disabled.
+#
+# IMPORTANT: ENABLE_PERSISTENT_CONFIG=false makes these env vars WIN over Open
+# WebUI's DB-persisted settings. The trade-off: any feature you would normally
+# toggle in the Admin UI is IGNORED and must be declared here as an env var
+# instead. That is why web search is turned on with env vars below -- without
+# them, web search silently stays off even if the DB has SearXNG configured.
+#
+# __LITELLM_MASTER_KEY__ must equal LITELLM_MASTER_KEY in litellm/.env.
+ExecStart=/usr/bin/docker run --rm --network=host \
+    -v open-webui:/app/backend/data \
+    -e PORT=3000 \
+    -e ENABLE_PERSISTENT_CONFIG=false \
+    -e ENABLE_OLLAMA_API=false \
+    -e ENABLE_OPENAI_API=true \
+    -e OPENAI_API_BASE_URL=http://127.0.0.1:4000/v1 \
+    -e OPENAI_API_KEY=__LITELLM_MASTER_KEY__ \
+    -e ENABLE_WEB_SEARCH=true \
+    -e WEB_SEARCH_ENGINE=searxng \
+    -e "SEARXNG_QUERY_URL=http://127.0.0.1:8888/search?q=<query>" \
+    --name open-webui ghcr.io/open-webui/open-webui:main
+ExecStop=/usr/bin/docker stop open-webui
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

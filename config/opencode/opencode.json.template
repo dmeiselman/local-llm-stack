@@ -1,0 +1,34 @@
+{
+  "//": "opencode -> LiteLLM gateway. Copy to ~/.config/opencode/opencode.json.",
+  "//apiKey": "Reads the gateway key from env LITELLM_MASTER_KEY (export it in your shell rc).",
+  "//context": "Keep each model's limit.context <= the llama-swap -c value or opencode will stall.",
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "litellm": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "LiteLLM (local gateway)",
+      "options": {
+        "baseURL": "http://127.0.0.1:4000/v1",
+        "apiKey": "{env:LITELLM_MASTER_KEY}"
+      },
+      "models": {
+        "local-fast": {
+          "name": "Qwen3.6 MoE (local, via litellm)",
+          "tool_call": true,
+          "limit": { "context": 196608, "output": 8192 }
+        },
+        "local-coder": {
+          "name": "Qwen3.6 27B coder (local, via litellm)",
+          "tool_call": true,
+          "limit": { "context": 114688, "output": 8192 }
+        },
+        "local-gemma": {
+          "name": "Gemma4 26B QAT thinking (local, via litellm)",
+          "tool_call": true,
+          "limit": { "context": 262144, "output": 8192 }
+        }
+      }
+    }
+  },
+  "model": "litellm/local-fast"
+}
